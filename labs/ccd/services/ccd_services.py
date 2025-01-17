@@ -2,41 +2,35 @@ import requests
 
 BASE_URL = "http://localhost:8000/api"
 
+
 class CCDServices:
 
     def register_patient(self, patient_info):
-        # Headers for the POST request
         headers = {
             "Content-Type": "application/json"
         }
+        response = requests.post(BASE_URL + '/patient/registration/', json=patient_info, headers=headers)
+        print("Patient registration status code : ", response.status_code)
+        return response.json()
 
-        # Sending the POST request
-        response = requests.post(BASE_URL+'/patient/registration/', json=patient_info, headers=headers)
+    def get_auth_token(self):
+        headers = {
+            "Content-Type": "application/json"
+        }
+        user_creds = {
+            "username": "demo",
+            "password": "demo@1234"
+        }
 
-        # Printing the response
-        print("Status Code:", response.status_code)
-        print("Response Body:", response.json())
+        response = requests.post(BASE_URL + '/auth-token/', json=user_creds, headers=headers)
+        return response.json()['token']
 
+    def delete_patient(self, patient_id):
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": "Token " + self.get_auth_token()
+        }
 
-# Payload for the POST request
-payload = {
-    "username": "Aakash123",
-    "email": "aaaaa@gmail.com",
-    "first_name": "Aakash",
-    "last_name": "Aggarwal",
-    "password1": "aakash@123",
-    "password2": "aakash@123",
-    "dob": "1999-06-13T00:00:00Z",
-    "gender": "male",
-    "ehr_code": "",
-    "user_profile": {
-        "address": "78 Wall Street mexico city",
-        "phone": "",
-        "preferred_alert_mode": "Email",
-        "secondary_alert_mode": "Email"
-    }
-}
+        response = requests.delete(BASE_URL + '/patient-app/delete/?patient_id=' + patient_id, headers=headers)
 
-CCDServices().register_patient(patient_info=payload)
-
-
+        print("Patient Deleted. Status Code:", response.status_code)
